@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Bot, Send, User, Loader2, Plus, Mic, AudioLines, Zap } from "lucide-react";
+import { Bot, Send, User, Loader2, Plus, Mic, AudioLines, Zap, Trash2, Copy, Check, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from "react-markdown";
 
@@ -26,16 +26,63 @@ export default function ChatPage() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [copyId, setCopyId] = useState<string | null>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
 
     // Initial greeting handling
     const hasStarted = messages.length > 0;
+
+    // Persistence: Load on mount
+    useEffect(() => {
+        const saved = localStorage.getItem("kgi_chat_history");
+        if (saved) {
+            try {
+                setMessages(JSON.parse(saved));
+            } catch (e) {
+                console.error("Failed to parse chat history", e);
+            }
+        }
+    }, []);
+
+    // Persistence: Save on change
+    useEffect(() => {
+        if (messages.length > 0) {
+            localStorage.setItem("kgi_chat_history", JSON.stringify(messages));
+        }
+    }, [messages]);
 
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollIntoView({ behavior: "smooth" });
         }
     }, [messages]);
+
+    const handleNewChat = () => {
+        if (confirm("Are you sure you want to clear this conversation?")) {
+            setMessages([]);
+            localStorage.removeItem("kgi_chat_history");
+        }
+    };
+
+    const handleCopy = (content: string, id: string) => {
+        navigator.clipboard.writeText(content);
+        setCopyId(id);
+        setTimeout(() => setCopyId(null), 2000);
+    };
+
+    const handleDownload = () => {
+        if (messages.length === 0) return;
+        const text = messages.map(m => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n---\n\n");
+        const blob = new Blob([`KGI TECHNICAL ASSISTANT - CONSULTATION SUMMARY\nGenerated: ${new Date().toLocaleString()}\n\n${text}`], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `KGI-Consultation-${new Date().toISOString().split('T')[0]}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    };
 
     const handleSuggestedPrompt = (prompt: string) => {
         setInput(prompt);
@@ -138,8 +185,26 @@ export default function ChatPage() {
                             <h1 className="font-semibold text-slate-800 tracking-tight">KGI Assistant</h1>
                         </div>
                         <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Support</span>
+                            <Button
+                                onClick={handleDownload}
+                                variant="ghost"
+                                size="sm"
+                                className="text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full flex items-center gap-2 px-3"
+                                title="Download Summary"
+                            >
+                                <Download className="h-4 w-4" />
+                                <span className="text-xs font-medium hidden md:inline">Export</span>
+                            </Button>
+                            <Button
+                                onClick={handleNewChat}
+                                variant="ghost"
+                                size="sm"
+                                className="text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-full flex items-center gap-2 px-3"
+                                title="Clear Conversation"
+                            >
+                                <Trash2 className="h-4 w-4" />
+                                <span className="text-xs font-medium hidden md:inline">Clear</span>
+                            </Button>
                         </div>
                     </div>
                 )}
@@ -196,10 +261,9 @@ export default function ChatPage() {
                                         "relative group max-w-[85%] md:max-w-[80%]"
                                     )}>
                                         <div className={cn(
-                                            "text-[15px] leading-relaxed",
                                             m.role === "user" ? "text-emerald-700 font-medium" : "text-slate-700"
                                         )}>
-                                            <div className="prose prose-sm max-w-none break-words">
+                                            <div className="prose prose-sm max-w-none break-words pr-8">
                                                 <ReactMarkdown
                                                     components={{
                                                         p: ({ children }) => <p className="mb-4 last:mb-0">{children}</p>,
@@ -211,6 +275,16 @@ export default function ChatPage() {
                                                 </ReactMarkdown>
                                             </div>
                                         </div>
+
+                                        {m.role === "assistant" && m.content && (
+                                            <button
+                                                onClick={() => handleCopy(m.content, `msg-${index}`)}
+                                                className="absolute top-0 -right-8 p-1.5 text-slate-300 hover:text-emerald-600 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100"
+                                                title="Copy to clipboard"
+                                            >
+                                                {copyId === `msg-${index}` ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}
