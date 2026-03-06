@@ -15,6 +15,25 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "KarachiGum.com | Premium Industrial Guar Gum Supplier",
   description: "Global leaders in industrial chemical supply. Providing premium quality Guar Gum and industrial solutions worldwide.",
+  keywords: [
+    "Guar Gum",
+    "Industrial Guar Gum",
+    "Guar Gum Supplier",
+    "Karachi Gum Industry",
+    "Guar Gum Pakistan",
+    "Food Grade Guar Gum",
+    "Guar Powder",
+    "Guar Splits",
+    "Guar Meal",
+    "Chemical Supplier",
+    "Industrial Thickening Agents",
+    "Rheology Modifiers",
+    "B2B Chemical Supply",
+    "Export Guar Gum",
+  ],
+  verification: {
+    google: "3uKrNIMABv7cqkCjoFyqv2OjIWcCUfZIQyhG_2PajGw",
+  },
 };
 
 import { Navbar } from "@/components/layout/Navbar";
