@@ -1,40 +1,42 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Box, Cpu, Database, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const STATUS_LOGS = [
-    { text: "INITIALIZING RHEOLOGY_ENGINE_V4", icon: <Cpu className="h-4 w-4" /> },
-    { text: "CALIBRATING VOLUMETRIC_FLUX", icon: <Database className="h-4 w-4" /> },
-    { text: "SYNCING PORT_LOGISTICS_KARACHI", icon: <Globe className="h-4 w-4" /> },
-    { text: "OPTIMIZING VISCOSITY_METRICS", icon: <Box className="h-4 w-4" /> },
-    { text: "SYSTEM STABILIZED. READY.", icon: <div className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" /> }
+const LETTERS = "KARACHIGUM".split("");
+
+// Random directions and delays for a "flying in" effect
+const LETTER_CONFIG = [
+    { dir: "-translate-x-[200%] -translate-y-[200%]", delay: "delay-[100ms]" },
+    { dir: "translate-x-[200%] -translate-y-[150%]", delay: "delay-[300ms]" },
+    { dir: "-translate-x-[150%] translate-y-[200%]", delay: "delay-[200ms]" },
+    { dir: "translate-x-[300%] translate-y-[100%]", delay: "delay-[500ms]" },
+    { dir: "-translate-x-[300%] -translate-y-[50%]", delay: "delay-[150ms]" },
+    { dir: "translate-x-[100%] translate-y-[300%]", delay: "delay-[400ms]" },
+    { dir: "translate-y-[250%] translate-x-[50%]", delay: "delay-[250ms]" },
+    { dir: "-translate-y-[300%] -translate-x-[100%]", delay: "delay-[600ms]" },
+    { dir: "translate-x-[250%] -translate-y-[300%]", delay: "delay-[100ms]" },
+    { dir: "-translate-x-[150%] translate-y-[150%]", delay: "delay-[350ms]" },
 ];
 
 export function LaboratoryLoading() {
-    const [logIndex, setLogIndex] = useState(0);
+    const [isAssembled, setIsAssembled] = useState(false);
     const [isVisible, setIsVisible] = useState(true);
     const [isFading, setIsFading] = useState(false);
 
     useEffect(() => {
-        // Log rotation logic
-        const logDuration = 4000; // Duration for all logs
-        const intervalTime = logDuration / STATUS_LOGS.length;
+        // Trigger assembly shortly after mount
+        const assemblyTimer = setTimeout(() => setIsAssembled(true), 100);
 
-        const logInterval = setInterval(() => {
-            setLogIndex((prev) => (prev < STATUS_LOGS.length - 1 ? prev + 1 : prev));
-        }, intervalTime);
-
-        // Visibility logic - 5 seconds total
-        const timer = setTimeout(() => {
+        // Visibility logic - 4 seconds total experience
+        const fadeTimer = setTimeout(() => {
             setIsFading(true);
-            setTimeout(() => setIsVisible(false), 1000); // Allow time for fade animation
-        }, 5000);
+            setTimeout(() => setIsVisible(false), 1000);
+        }, 3500);
 
         return () => {
-            clearInterval(logInterval);
-            clearTimeout(timer);
+            clearTimeout(assemblyTimer);
+            clearTimeout(fadeTimer);
         };
     }, []);
 
@@ -46,93 +48,67 @@ export function LaboratoryLoading() {
             isFading ? "opacity-0 pointer-events-none scale-110" : "opacity-100"
         )}>
             {/* 1. Technical Grid Layer */}
-            <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.4]"
+            <div className="absolute inset-0 z-0 pointer-events-none opacity-[0.2]"
                 style={{
                     backgroundImage: `
                         linear-gradient(to right, #e2e8f0 1px, transparent 1px),
                         linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)
                     `,
-                    backgroundSize: '80px 80px'
+                    backgroundSize: '100px 100px'
                 }}
             />
 
-            {/* 2. Drifting Industrial Orbs */}
-            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-emerald-500/[0.08] blur-[130px] rounded-full animate-pulse" />
-                <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-slate-500/[0.05] blur-[150px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
+            {/* 2. Central Glow */}
+            <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none flex items-center justify-center">
+                <div className={cn(
+                    "w-[400px] h-[400px] bg-emerald-500/[0.05] blur-[120px] rounded-full transition-all duration-[2000ms] ease-out",
+                    isAssembled ? "scale-150 opacity-100" : "scale-50 opacity-0"
+                )} />
             </div>
 
             {/* 3. Noise Texture */}
-            <div className="absolute inset-0 z-1 pointer-events-none opacity-[0.05] mix-blend-multiply"
+            <div className="absolute inset-0 z-1 pointer-events-none opacity-[0.03] mix-blend-multiply"
                 style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
 
-            <div className="relative z-10 flex flex-col items-center max-w-sm w-full">
-                {/* 4. Technical Header */}
-                <div className="flex items-center gap-3 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                    <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-200">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                    </div>
-                    <div className="text-left">
-                        <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-[0.3em]">System Boot</div>
-                        <div className="text-lg font-bold text-slate-800 tracking-tight">Technical Services</div>
-                    </div>
-                </div>
-
-                {/* 5. Progress System */}
-                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden mb-8 shadow-inner">
-                    <div
-                        className="h-full bg-emerald-500 transition-all duration-700 ease-out shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-                        style={{ width: `${((logIndex + 1) / STATUS_LOGS.length) * 100}%` }}
-                    />
-                </div>
-
-                {/* 6. Status Logs */}
-                <div className="w-full space-y-3 font-mono">
-                    <div
-                        key={logIndex}
-                        className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-slate-100 shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300"
-                    >
-                        <div className="text-emerald-500">
-                            {STATUS_LOGS[logIndex].icon}
-                        </div>
-                        <span className="text-[11px] font-bold text-slate-600 tracking-wider uppercase">
-                            {STATUS_LOGS[logIndex].text}
+            <div className="relative z-10 flex flex-col items-center">
+                {/* 4. Animated Letters */}
+                <div className="flex items-center gap-1 md:gap-3 mb-4">
+                    {LETTERS.map((char, i) => (
+                        <span
+                            key={i}
+                            className={cn(
+                                "text-5xl md:text-8xl font-black text-slate-900 tracking-tighter transition-all duration-[1200ms] cubic-bezier(0.34, 1.56, 0.64, 1)",
+                                i === 6 ? "mr-4 md:mr-8" : "", // Space between KARACHI and GUM
+                                !isAssembled
+                                    ? cn("opacity-0 scale-50 blur-xl", LETTER_CONFIG[i].dir)
+                                    : "opacity-100 translate-x-0 translate-y-0 scale-100 blur-0",
+                                LETTER_CONFIG[i].delay
+                            )}
+                        >
+                            {char}
                         </span>
-                    </div>
-
-                    {/* Previous/Ghost Logs */}
-                    {logIndex > 0 && (
-                        <div className="flex items-center gap-3 px-4 py-2 opacity-20 blur-[0.5px]">
-                            <div className="text-slate-400">
-                                {STATUS_LOGS[logIndex - 1].icon}
-                            </div>
-                            <span className="text-[10px] font-medium text-slate-400 tracking-wider uppercase">
-                                {STATUS_LOGS[logIndex - 1].text}
-                            </span>
-                        </div>
-                    )}
+                    ))}
                 </div>
 
-                {/* 7. Branding */}
-                <div className="mt-16 text-center">
-                    <div className="text-slate-300 font-bold tracking-[0.4em] uppercase text-[9px] mb-2 leading-none">
-                        Karachi Gum Industry
-                    </div>
-                    <div className="flex items-center justify-center gap-3">
-                        <div className="h-[1px] w-8 bg-slate-100" />
-                        <div className="h-1 w-1 rounded-full bg-emerald-400" />
-                        <div className="h-[1px] w-8 bg-slate-100" />
+                {/* 5. Subtitle */}
+                <div className={cn(
+                    "transition-all duration-1000 delay-[1000ms] ease-out",
+                    isAssembled ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+                )}>
+                    <div className="text-[10px] md:text-xs font-bold text-emerald-600 uppercase tracking-[0.5em] flex items-center gap-3">
+                        <div className="h-[1px] w-6 md:w-12 bg-emerald-200" />
+                        Industrial Chemical Excellence
+                        <div className="h-[1px] w-6 md:w-12 bg-emerald-200" />
                     </div>
                 </div>
             </div>
 
-            {/* Static UI Decor */}
-            <div className="absolute top-10 right-10 flex flex-col items-end gap-1 opacity-20">
-                <div className="text-[10px] font-mono text-slate-400 tracking-tighter">LAT: 24.8607° N</div>
-                <div className="text-[10px] font-mono text-slate-400 tracking-tighter">LON: 67.0011° E</div>
-            </div>
-            <div className="absolute bottom-10 left-10 opacity-20">
-                <div className="text-[10px] font-mono text-slate-400 tracking-widest">ENCRYPTION: AES-256-GCM</div>
+            {/* 6. Static Branding Decor */}
+            <div className="absolute bottom-12 left-12 opacity-30 flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="text-[9px] font-mono text-slate-400 tracking-widest uppercase">
+                    Established 1995 | Karachi, Pakistan
+                </div>
             </div>
         </div>
     );
