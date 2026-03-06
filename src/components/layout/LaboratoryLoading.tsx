@@ -82,15 +82,15 @@ export function LaboratoryLoading() {
             <div className="absolute inset-0 z-1 pointer-events-none opacity-[0.02] mix-blend-multiply"
                 style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }} />
 
-            <div className="relative z-10 flex flex-col items-center">
+            <div className="relative z-10 flex flex-col items-center w-full max-w-[100vw] overflow-hidden">
                 {/* 6. Animated Letters with Shimmer */}
-                <div className="flex items-center gap-1 md:gap-4 mb-8">
+                <div className="flex flex-nowrap items-center justify-center gap-0.5 sm:gap-2 md:gap-4 mb-10 whitespace-nowrap">
                     {LETTERS.map((char, i) => (
-                        <div key={i} className="relative group">
+                        <div key={i} className="relative group flex shrink-0">
                             <span
                                 className={cn(
-                                    "text-6xl md:text-9xl font-black transition-all duration-[1500ms] cubic-bezier(0.22, 1, 0.36, 1) cursor-default select-none",
-                                    i === 6 ? "ml-4 md:ml-12" : "",
+                                    "text-[8vw] sm:text-6xl md:text-9xl font-black transition-all duration-[1500ms] cubic-bezier(0.22, 1, 0.36, 1) cursor-default select-none",
+                                    i === 6 ? "ml-2 sm:ml-4 md:ml-12" : "",
                                     !isAssembled
                                         ? cn("opacity-0 scale-50 blur-2xl", LETTER_CONFIG[i].dir)
                                         : "opacity-100 translate-x-0 translate-y-0 scale-100 blur-0",
@@ -110,34 +110,34 @@ export function LaboratoryLoading() {
 
                 {/* 7. Subtitle with Progressive reveal */}
                 <div className={cn(
-                    "transition-all duration-1000 delay-[1200ms] ease-out",
+                    "transition-all duration-1000 delay-[1200ms] ease-out w-full",
                     isAssembled ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-95"
                 )}>
-                    <div className="flex flex-col items-center">
-                        <div className="text-[10px] md:text-xs font-bold text-emerald-600 uppercase tracking-[0.8em] flex items-center gap-4 mb-2">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="text-[8px] sm:text-[10px] md:text-xs font-bold text-emerald-600 uppercase tracking-[0.4em] sm:tracking-[0.8em] flex items-center gap-2 sm:gap-4 mb-2">
                             Industrial Chemical Excellence
                         </div>
-                        <div className="h-[1px] w-32 bg-gradient-to-r from-transparent via-emerald-200 to-transparent" />
+                        <div className="h-[1px] w-24 sm:w-32 bg-gradient-to-r from-transparent via-emerald-200 to-transparent" />
                     </div>
                 </div>
             </div>
 
             {/* 8. Cinematic Footer Decor */}
             <div className={cn(
-                "absolute bottom-16 w-full px-12 flex justify-between items-end transition-all duration-1000 delay-[1500ms]",
+                "absolute bottom-8 sm:bottom-16 w-full px-6 sm:px-12 flex flex-col sm:flex-row justify-between items-center sm:items-end gap-4 sm:gap-0 transition-all duration-1000 delay-[1500ms]",
                 isAssembled ? "opacity-40 translate-y-0" : "opacity-0 translate-y-4"
             )}>
-                <div className="flex flex-col gap-1">
-                    <div className="text-[8px] font-mono text-slate-400 tracking-widest uppercase">Precision Standards</div>
-                    <div className="flex gap-1">
+                <div className="flex flex-col items-center sm:items-start gap-1">
+                    <div className="text-[7px] sm:text-[8px] font-mono text-slate-400 tracking-widest uppercase text-center sm:text-left">Precision Standards</div>
+                    <div className="flex gap-1 justify-center sm:justify-start">
                         {[1, 2, 3].map(j => (
-                            <div key={j} className="h-1 w-4 bg-slate-200 rounded-full overflow-hidden">
+                            <div key={j} className="h-1 w-3 sm:w-4 bg-slate-200 rounded-full overflow-hidden">
                                 <div className="h-full bg-emerald-400 animate-[loading_2s_infinite_ease-in-out]" style={{ animationDelay: `${j * 0.2}s` }} />
                             </div>
                         ))}
                     </div>
                 </div>
-                <div className="text-[8px] font-mono text-slate-400 tracking-tighter text-right">
+                <div className="text-[7px] sm:text-[8px] font-mono text-slate-400 tracking-tighter text-center sm:text-right">
                     EST. 1995 • PIONEERING RHEOLOGY
                 </div>
             </div>
