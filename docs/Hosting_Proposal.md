@@ -97,7 +97,7 @@ This solution will provide you with a **professional online presence** along wit
 Please let me know if you would like to proceed. I will be happy to start immediately.
 
 Best regards,
-Syed **Mujtaba Abbas**
-Full Stack Web Developer
+**Syed Mujtaba Abbas**
+Full Stack & Agentic AI Developer
 GitHub: syed-mujtaba-stack
 Email: [abbasmujtaba125@gmail.com](mailto:abbasmujtaba125@gmail.com)
