@@ -5,10 +5,31 @@ import Image from "next/image";
 import { Facebook, Linkedin, Twitter, Mail, Phone, MapPin } from "lucide-react";
 import { usePathname } from "next/navigation";
 
+import { useState, useRef } from "react";
+
 export function Footer() {
     const pathname = usePathname();
+    const tapCountRef = useRef<number>(0);
+    const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     if (pathname === "/chat") return null;
+
+    // Mobile Secret Trigger: Tap 3 times on copyright text to open Admin Login Modal
+    const handleFooterTap = () => {
+        tapCountRef.current += 1;
+        if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+
+        if (tapCountRef.current >= 3) {
+            tapCountRef.current = 0;
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new Event("open-admin-secret"));
+            }
+        } else {
+            tapTimerRef.current = setTimeout(() => {
+                tapCountRef.current = 0;
+            }, 1500);
+        }
+    };
 
     return (
         <footer className="w-full border-t bg-muted/40">
@@ -83,7 +104,13 @@ export function Footer() {
                 </div>
 
                 <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t pt-8 text-sm text-muted-foreground md:flex-row">
-                    <p>© {new Date().getFullYear()} Karachi Gum. All rights reserved.</p>
+                    <p 
+                        onClick={handleFooterTap} 
+                        className="cursor-pointer select-none" 
+                        title="Karachi Gum Industry"
+                    >
+                        © {new Date().getFullYear()} Karachi Gum. All rights reserved.
+                    </p>
                     <div className="flex gap-6">
                         <Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link>
                         <Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link>

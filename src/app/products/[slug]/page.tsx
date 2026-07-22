@@ -1,15 +1,15 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle2, Share2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
-// Data Source matching the new product list
-const products: Record<string, any> = {
+// Hardcoded fallback data in case backend API is not running
+const FALLBACK_PRODUCTS: Record<string, any> = {
     "guar-seeds": {
         name: "Guar Seeds",
         category: "Raw Material",
-        image: "/Products/GuarSeeds.jpg",
+        image_url: "/Products/GuarSeeds.jpg",
         description: "Guar Seeds (Cyamopsis tetragonoloba) are the raw material for Guar Gum production. Sourced from the finest farms in Pakistan, our seeds are selected for their high purity and gum content.",
         specs: [
             { label: "Purity", value: "98% Min" },
@@ -18,15 +18,15 @@ const products: Record<string, any> = {
             { label: "Gum Content", value: "28-30%" }
         ],
         applications: [
-            "Guar Gum Manufacturing",
-            "Agriculture (Seeding)",
-            "Animal Feed (Whole)"
+            { application: "Guar Gum Manufacturing" },
+            { application: "Agriculture (Seeding)" },
+            { application: "Animal Feed (Whole)" }
         ]
     },
     "guar-splits": {
         name: "Guar Splits",
         category: "Intermediate Product",
-        image: "/Products/GuarSplits.jpg",
+        image_url: "/Products/GuarSplits.jpg",
         description: "Guar Splits are the endosperm of the Guar seed, separated from the husk and germ. They are the primary source for manufacturing high-quality Guar Gum powder.",
         specs: [
             { label: "De-husked Splits", value: "98% Min" },
@@ -35,15 +35,15 @@ const products: Record<string, any> = {
             { label: "Gum (Galactomannan)", value: "80 - 82%" }
         ],
         applications: [
-            "Food Grade Gum Production",
-            "Industrial Gum Production",
-            "Textile Processing"
+            { application: "Food Grade Gum Production" },
+            { application: "Industrial Gum Production" },
+            { application: "Textile Processing" }
         ]
     },
     "guar-meal-churi": {
         name: "Guar Meal Churi",
         category: "Animal Feed",
-        image: "/Products/GuarMealChuri.jpg",
+        image_url: "/Products/GuarMealChuri.jpg",
         description: "Guar Churi is a byproduct of Guar splitting, rich in protein and carbohydrates. It is widely used as a nutritious cattle feed supplement.",
         specs: [
             { label: "Protein", value: "35 - 38%" },
@@ -52,15 +52,15 @@ const products: Record<string, any> = {
             { label: "Fiber", value: "Max 15%" }
         ],
         applications: [
-            "Cattle Feed",
-            "Livestock Nutrition",
-            "Poultry Feed Mix"
+            { application: "Cattle Feed" },
+            { application: "Livestock Nutrition" },
+            { application: "Poultry Feed Mix" }
         ]
     },
     "guar-meal-korma": {
         name: "Guar Meal Korma",
         category: "Animal Feed",
-        image: "/Products/GuarMealKorma.jpg",
+        image_url: "/Products/GuarMealKorma.jpg",
         description: "Guar Korma is the high-protein germ part of the Guar seed. It is a premium feed ingredient, often roasted (to remove anti-nutritional factors) for better digestibility.",
         specs: [
             { label: "Protein", value: "50 - 55%" },
@@ -69,15 +69,15 @@ const products: Record<string, any> = {
             { label: "Profat", value: "Min 55%" }
         ],
         applications: [
-            "High-Protein Poultry Feed",
-            "Aqua Feed",
-            "Swine Feed"
+            { application: "High-Protein Poultry Feed" },
+            { application: "Aqua Feed" },
+            { application: "Swine Feed" }
         ]
     },
     "guar-gum-powder": {
         name: "Guar Gum Powder",
         category: "Finished Product",
-        image: "/Products/GuarGumPowder.jpg",
+        image_url: "/Products/GuarGumPowder.jpg",
         description: "Our flagship product, Guar Gum Powder, is a versatile thickener and stabilizer used across food, oil drilling, paper, and textile industries.",
         specs: [
             { label: "Viscosity (2 hrs)", value: "3500 - 7000 CPS" },
@@ -86,13 +86,67 @@ const products: Record<string, any> = {
             { label: "Particle Size", value: "100 - 300 Mesh" }
         ],
         applications: [
-            "Food (Bakery, Dairy, Sauces)",
-            "Oil & Gas (Fracturing Fluids)",
-            "Paper Manufacturing",
-            "Textile Printing"
+            { application: "Food (Bakery, Dairy, Sauces)" },
+            { application: "Oil & Gas (Fracturing Fluids)" },
+            { application: "Paper Manufacturing" },
+            { application: "Textile Printing" }
         ]
     }
 };
+
+interface ProductSpec {
+    label: string;
+    value: string;
+}
+
+interface ProductApplication {
+    application: string;
+}
+
+interface Product {
+    id?: number;
+    name: string;
+    slug: string;
+    category: string;
+    image_url: string | null;
+    description: string;
+    specs: ProductSpec[];
+    applications: ProductApplication[];
+}
+
+async function getProductBySlug(slug: string): Promise<Product | null> {
+    const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+    try {
+        const res = await fetch(`${APP_URL}/api/admin/products`, {
+            cache: "no-store",
+            headers: {
+                "Accept": "application/json",
+            }
+        });
+        if (res.ok) {
+            const allProducts = await res.json();
+            const found = allProducts.find((p: any) => p.slug === slug);
+            if (found) {
+                return {
+                    id: found.id || found._id,
+                    name: found.name,
+                    slug: found.slug,
+                    category: found.category,
+                    image_url: found.image_url,
+                    description: found.description,
+                    specs: found.specs || [],
+                    applications: Array.isArray(found.applications) 
+                        ? found.applications.map((app: any) => typeof app === 'string' ? { application: app } : app)
+                        : []
+                };
+            }
+        }
+        return null;
+    } catch (e) {
+        console.warn("API not reachable. Falling back to local static catalog item.", e);
+        return null;
+    }
+}
 
 export default async function ProductDetailPage({
     params,
@@ -100,11 +154,22 @@ export default async function ProductDetailPage({
     params: Promise<{ slug: string }>;
 }) {
     const { slug } = await params;
-    const product = products[slug];
+    
+    // Attempt dynamic fetch from Admin API
+    const apiProduct = await getProductBySlug(slug);
+    
+    // Resolve static fallback if dynamic fetch returned null
+    const product = apiProduct || FALLBACK_PRODUCTS[slug];
 
     if (!product) {
         notFound();
     }
+
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    const imageSrc = product.image_url
+        ? (product.image_url.startsWith('http') ? product.image_url : (product.image_url.startsWith('/') ? product.image_url : `${API_URL}${product.image_url}`))
+        : `/Products/${slug}.jpg`;
 
     return (
         <div className="min-h-screen py-12">
@@ -120,11 +185,10 @@ export default async function ProductDetailPage({
                     {/* Main Image */}
                     <div className="space-y-4">
                         <div className="relative aspect-square w-full bg-muted rounded-lg border overflow-hidden">
-                            <Image
-                                src={product.image}
+                            <img
+                                src={imageSrc}
                                 alt={product.name}
-                                fill
-                                className="object-cover"
+                                className="object-cover w-full h-full"
                             />
                         </div>
                     </div>
@@ -136,38 +200,42 @@ export default async function ProductDetailPage({
                                 {product.category}
                             </span>
                         </div>
-                        <h1 className="text-4xl font-bold tracking-tight mb-4">{product.name}</h1>
-                        <p className="text-lg text-muted-foreground leading-relaxed mb-8">
+                        <h1 className="text-4xl font-bold tracking-tight mb-4 text-slate-800">{product.name}</h1>
+                        <p className="text-base text-muted-foreground leading-relaxed mb-8 whitespace-pre-line">
                             {product.description}
                         </p>
 
                         {/* Specifications Table */}
-                        <div className="bg-card border rounded-lg overflow-hidden mb-8">
-                            <div className="px-6 py-4 border-b bg-muted/30">
-                                <h3 className="font-semibold">Technical Specifications</h3>
+                        {product.specs && product.specs.length > 0 && (
+                            <div className="bg-card border rounded-lg overflow-hidden mb-8">
+                                <div className="px-6 py-4 border-b bg-muted/30">
+                                    <h3 className="font-semibold">Technical Specifications</h3>
+                                </div>
+                                <div className="divide-y">
+                                    {product.specs.map((spec: any, idx: number) => (
+                                        <div key={idx} className="grid grid-cols-2 px-6 py-3 text-sm">
+                                            <span className="text-muted-foreground">{spec.label}</span>
+                                            <span className="font-medium text-right text-slate-800">{spec.value}</span>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="divide-y">
-                                {product.specs.map((spec: any, idx: number) => (
-                                    <div key={idx} className="grid grid-cols-2 px-6 py-3 text-sm">
-                                        <span className="text-muted-foreground">{spec.label}</span>
-                                        <span className="font-medium text-right">{spec.value}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        )}
 
                         {/* Applications */}
-                        <div className="mb-8">
-                            <h3 className="font-semibold text-lg mb-4">Common Applications</h3>
-                            <ul className="grid sm:grid-cols-2 gap-3">
-                                {product.applications.map((app: string, idx: number) => (
-                                    <li key={idx} className="flex items-start text-sm text-muted-foreground">
-                                        <CheckCircle2 className="h-4 w-4 mr-2 text-primary shrink-0 mt-0.5" />
-                                        {app}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+                        {product.applications && product.applications.length > 0 && (
+                            <div className="mb-8">
+                                <h3 className="font-semibold text-lg mb-4">Common Applications</h3>
+                                <ul className="grid sm:grid-cols-2 gap-3">
+                                    {product.applications.map((app: any, idx: number) => (
+                                        <li key={idx} className="flex items-start text-sm text-muted-foreground">
+                                            <CheckCircle2 className="h-4 w-4 mr-2 text-primary shrink-0 mt-0.5" />
+                                            {app.application}
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* Actions */}
                         <div className="flex flex-col sm:flex-row gap-4 mt-auto pt-6 border-t">

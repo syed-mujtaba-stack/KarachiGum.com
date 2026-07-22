@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -41,6 +42,7 @@ import { Footer } from "@/components/layout/Footer";
 import { ChatTrigger } from "@/components/layout/ChatTrigger";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { LaboratoryLoading } from "@/components/layout/LaboratoryLoading";
+import { AdminSecretShortcut } from "@/components/layout/AdminSecretShortcut";
 
 export default function RootLayout({
   children,
@@ -52,12 +54,27 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col`}
       >
+        {/* Google Analytics 4 */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
+          `}
+        </Script>
+
         <LaboratoryLoading />
         <Navbar />
         <main className="flex-1 pb-16 md:pb-0"> {/* Add padding for mobile nav */}
           {children}
         </main>
         <ChatTrigger />
+        <AdminSecretShortcut />
         <MobileNav />
         <Footer />
       </body>

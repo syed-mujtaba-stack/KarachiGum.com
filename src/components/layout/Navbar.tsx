@@ -1,3 +1,6 @@
+"use client";
+
+import { useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -13,13 +16,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export function Navbar() {
-    const navLinks = [
-        { name: "Home", href: "/" },
-        { name: "About Us", href: "/about" },
-        { name: "Quality Control", href: "/quality-control" },
-        // Products is handled separately now
-        { name: "Contact Us", href: "/contact" },
-    ];
+    const tapCountRef = useRef<number>(0);
+    const tapTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     const productLinks = [
         { name: "Guar Seeds", href: "/products/guar-seeds" },
@@ -29,11 +27,29 @@ export function Navbar() {
         { name: "Guar Gum Powder", href: "/products/guar-gum-powder" },
     ];
 
+    // Secret Trigger: Click/Tap 3 times on Logo to open Admin secret login
+    const handleLogoClick = (e: React.MouseEvent) => {
+        tapCountRef.current += 1;
+        if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
+
+        if (tapCountRef.current >= 3) {
+            e.preventDefault(); // Prevent navigating away when triggering secret
+            tapCountRef.current = 0;
+            if (typeof window !== "undefined") {
+                window.dispatchEvent(new Event("open-admin-secret"));
+            }
+        } else {
+            tapTimerRef.current = setTimeout(() => {
+                tapCountRef.current = 0;
+            }, 1500);
+        }
+    };
+
     return (
         <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
-                {/* Logo */}
-                <Link href="/" className="flex items-center gap-2">
+                {/* Logo with 3-click secret admin trigger */}
+                <Link href="/" onClick={handleLogoClick} className="flex items-center gap-2 select-none">
                     <Image src="/Logo.png" alt="Karachi Gum Logo" width={180} height={60} className="w-44 h-auto object-contain" />
                 </Link>
 
